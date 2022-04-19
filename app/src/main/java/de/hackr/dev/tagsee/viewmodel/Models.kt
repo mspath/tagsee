@@ -4,56 +4,67 @@ data class TaggedPhoto(val url: String, val tags: MutableList<String>) {
 
     // the export format for string based storage like preferences
     // url<tag,tag,..>
-    fun serialize() = "${url}<${tags.toSet().map {it.trim()}.joinToString(",")}> "
+    fun serialize() = "${url}<${tags.toSet().map {it.trim()}.joinToString(",")}>"
+
+    companion object {
+        fun fromSerializedString(line: String): TaggedPhoto {
+            val url = line.substringBefore("<")
+            val tags = line.substringAfter("<")
+                .substringBefore(">")
+                .split(",")
+            return TaggedPhoto(url, tags.toMutableList())
+        }
+    }
 }
 
 data class TaggedPhotos(val collection: List<TaggedPhoto>) {
 
-    // note: the serialize of single photos will provide the space seperator
-    // FIXME move the space here
+    // use this to save the current state of a collection
     fun serialze() = collection
         .filter { it.tags.isNotEmpty() }
-        .joinToString("") { it.serialize() }
+        .joinToString(" ") { it.serialize() }
+        .trim()
 
     // serializes the tagged photos and replaces the status of the pending toggle
+    // use this to update values in a collection
     fun serializePendingToggle(url: String, tag: String): String {
         val taggedPhoto = map[url]
         taggedPhoto?.let {
             if (it.tags.contains(tag)) it.tags.remove(tag)
             else it.tags.add(tag)
         }
-        return collection.filter { it.tags.isNotEmpty() }
-            .joinToString("") { it.serialize() }
+        return collection
+            .filter { it.tags.isNotEmpty() }
+            .joinToString(" ") { it.serialize() }
+            .trim()
     }
 
-    val map = collection.associateBy { it.url }
+    private val map = collection.associateBy { it.url }
 
     fun getTags() = collection.map { it.tags.toList() }.flatten().toSet()
 
     companion object {
-        // we need to pass in both lists of urls and annotated urls since the list
+        // we need to pass in both lists of urls and tagged urls since the list
         // of available urls is not in control of the app, files might be new or removed
         // at any time
         // that said this object becomes the source of truth
         fun fromSerialized(gallery: List<String>, meta: List<String>): TaggedPhotos {
 
-            val taggedPhotos = gallery.map { url ->
-                TaggedPhoto(url, mutableListOf<String>())
+            // map of the available metadata
+            val metaMap = meta.associate { line ->
+                Pair(line.substringBefore("<"), TaggedPhoto.fromSerializedString(line))
             }
 
-            val map = taggedPhotos.associateBy { it.url }
-
-            meta.forEach { line ->
-                val url = line.substringBefore("<")
-                val tags = line.substringAfter("<")
-                    .substringBefore(">")
-                    .split(",")
-                map[url]?.tags?.addAll(tags)
+            // we just use those which are currently available
+            // defaults to no tags if there are no metadata yet.
+            val taggedPhotos = gallery.map { url ->
+                metaMap.getOrDefault(url, TaggedPhoto(url, mutableListOf<String>()))
             }
 
             return TaggedPhotos(taggedPhotos)
         }
 
+        // FIXME move this in a helper class
         val dummy1 = TaggedPhoto("http://192.168.178.41:3000/markus/images/flat1.jpg",
             mutableListOf("puppet"))
         val dummy2 = TaggedPhoto("http://192.168.178.41:3000/markus/images/flat2.jpg",

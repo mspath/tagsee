@@ -1,7 +1,5 @@
 package de.hackr.dev.tagsee.util
 
-// see https://gist.github.com/stevdza-san/73a573eabf6f30514a3431f010ad6bf1
-
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -60,6 +58,7 @@ fun SelectableItem(
 
     val clickEnabled = remember { mutableStateOf(true) }
 
+    // see https://gist.github.com/stevdza-san/73a573eabf6f30514a3431f010ad6bf1
     LaunchedEffect(key1 = selected) {
         if (selected) {
             clickEnabled.value = false

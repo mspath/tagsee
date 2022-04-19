@@ -27,6 +27,8 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     val viewModel: TagseeViewmodel = hiltViewModel()
+                    viewModel.resetUser()
+                    viewModel.resetUsertags()
                     val startDestination = Screen.Lobby
                     val navController = rememberNavController()
                     TagseeNavGraph(navController = navController,

@@ -16,7 +16,6 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "ap
 
 class DataStoreRepository(context: Context) {
 
-    // should be refactored to use Room
     private val dataStore = context.dataStore
 
     private object PreferencesKey {
