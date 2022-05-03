@@ -19,18 +19,18 @@ class DataStoreRepository(context: Context) {
     private val dataStore = context.dataStore
 
     private object PreferencesKey {
-        val usernameKey = stringPreferencesKey(name = "username")
+        val gallerynameKey = stringPreferencesKey(name = "galleryname")
         val metadataKey = stringPreferencesKey(name = "metadata")
         val imagesKey = stringPreferencesKey(name = "images")
     }
 
-    suspend fun saveUsernameState(username: String) {
+    suspend fun saveGallerynameState(galleryname: String) {
         dataStore.edit { preferences ->
-            preferences[PreferencesKey.usernameKey] = username
+            preferences[PreferencesKey.gallerynameKey] = galleryname
         }
     }
 
-    fun getUsernameState(): Flow<String> {
+    fun getGallerynameState(): Flow<String> {
         return dataStore.data
             .catch { exception ->
                 if (exception is IOException)
@@ -39,8 +39,8 @@ class DataStoreRepository(context: Context) {
                     throw exception
             }
             .map { preferences ->
-                val username = preferences[PreferencesKey.usernameKey] ?: ""
-                username
+                val galleryname = preferences[PreferencesKey.gallerynameKey] ?: ""
+                galleryname
             }
     }
 

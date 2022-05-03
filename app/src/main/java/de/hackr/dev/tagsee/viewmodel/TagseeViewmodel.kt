@@ -8,7 +8,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.hackr.dev.tagsee.data.DataStoreRepository
-import de.hackr.dev.tagsee.network.TagseeApi
+import de.hackr.dev.tagsee.model.Cover
+import de.hackr.dev.tagsee.model.TaggedPhotos
 import de.hackr.dev.tagsee.network.TagseeApiService
 import de.hackr.dev.tagsee.util.FilterStrategy
 import kotlinx.coroutines.Dispatchers
@@ -30,10 +31,13 @@ class TagseeViewmodel @Inject constructor(
     }
 
     // list of tags a user plans to add
-    private var usertags: MutableState<String> = mutableStateOf("cats,dogs")
+    private var usertags: MutableState<String> = mutableStateOf("something,nothing")
 
-    // tmp val to validate the existence of a gallery
-    val lobbyUserGallerySize: MutableState<Int> = mutableStateOf(0)
+    // list of the covers of the galleries
+    val covers: MutableState<List<Cover>> = mutableStateOf(emptyList())
+
+    // size of the gallery selected in the lobby.
+    val lobbyGallerySize: MutableState<Int> = mutableStateOf(0)
 
     // list of tags to chose from, used for toggling  on or off
     val selectedTagsMap = mutableStateMapOf<String, Boolean>()
@@ -49,8 +53,8 @@ class TagseeViewmodel @Inject constructor(
 
     val selectedFilterStrategy: MutableState<FilterStrategy> = mutableStateOf(FilterStrategy.ALL_IMAGES)
 
-    // this builds a flow of the current taggedphotos instance
-    // it should come full circle by saving the serialized meta to express,
+    // this builds a flow of the current gallery
+    // it should come full circle by saving the serialized meta to the web-service,
     // reloading it from the server and saving it to the preferences datastore
     private val taggedPhotosFlow = repository.getImagesState()
         .combine(repository.getMetadataState()) { images, metadata ->
@@ -63,28 +67,28 @@ class TagseeViewmodel @Inject constructor(
 
     fun getTags() = currentTags
 
-    fun changeUser(username: String) {
-        saveUsername(username)
-        reloadGallery(username)
-        reloadMeta(username)
+    fun changeGallery(galleryname: String) {
+        saveGalleryname(galleryname)
+        reloadGalleryImages(galleryname)
+        reloadGalleryMeta(galleryname)
         usertags.value = ""
         selectedTagsMap.keys.forEach { selectedTagsMap.remove(it) }
     }
 
-    fun resetUser() {
+    fun resetGallery() {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.saveUsernameState("")
+            repository.saveGallerynameState("")
         }
     }
 
-    private fun saveUsername(username: String) {
+    private fun saveGalleryname(galleryname: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            repository.saveUsernameState(username)
+            repository.saveGallerynameState(galleryname)
         }
     }
 
-    fun getUsername(): Flow<String> {
-        return repository.getUsernameState()
+    fun getGalleryname(): Flow<String> {
+        return repository.getGallerynameState()
     }
 
     fun getUsertags(): List<String> {
@@ -96,7 +100,7 @@ class TagseeViewmodel @Inject constructor(
     }
 
     fun resetUsertags() {
-        saveUsertags("cats,cute")
+        saveUsertags("star")
     }
 
     private fun saveMetadata(metadata: String) {
@@ -111,13 +115,10 @@ class TagseeViewmodel @Inject constructor(
         }
     }
 
-    fun reloadGallery(username: String) {
-        Log.d(TAG, "reloadGallery()")
+    fun reloadGalleryImages(galleryname: String) {
         viewModelScope.launch {
             try {
-                //val listResult = TagseeApi.retrofitService.getGallery(username)
-                val listResult = apiService.getGallery(username)
-                Log.d(TAG, listResult.joinToString("\n"))
+                val listResult = apiService.getGalleryImages(galleryname)
                 saveImages(listResult.joinToString("\n"))
             } catch (e: Exception) {
                 Log.e(TAG, e.toString())
@@ -125,13 +126,10 @@ class TagseeViewmodel @Inject constructor(
         }
     }
 
-    fun reloadMeta(username: String) {
-        Log.d(TAG, "reloadMeta()")
+    fun reloadGalleryMeta(galleryname: String) {
         viewModelScope.launch {
             try {
-                //val meta = TagseeApi.retrofitService.getMeta(username)
-                val meta = apiService.getMeta(username)
-                Log.d(TAG, meta.toString())
+                val meta = apiService.getGalleryMeta(galleryname)
                 saveMetadata(meta.joinToString("\n"))
             } catch (e: Exception) {
                 Log.e(TAG, e.toString())
@@ -139,14 +137,29 @@ class TagseeViewmodel @Inject constructor(
         }
     }
 
-    fun updateMeta(username: String, photos: TaggedPhotos) {
+    fun updateGalleryMeta(galleryname: String, photos: TaggedPhotos) {
         viewModelScope.launch {
             try {
                 val body: RequestBody = photos.serialze()
                     .toRequestBody("text/plain".toMediaTypeOrNull())
-                //TagseeApi.retrofitService.updateMeta(username, body)
-                apiService.updateMeta(username, body)
-                reloadMeta(username)
+                apiService.postGalleryMeta(galleryname, body)
+                reloadGalleryMeta(galleryname)
+            } catch (e: Exception) {
+                Log.e(TAG, e.toString())
+            }
+        }
+    }
+
+    fun getCovers() {
+        viewModelScope.launch {
+            try {
+                val gallerynames = apiService.getGallerynames()
+                covers.value = gallerynames.map { galleryname ->
+                    val images = apiService.getGalleryImages(galleryname)
+                    val imageLeft = if (images.size > 0) images[0] else ""
+                    val imageRight = if (images.size > 1) images[1] else ""
+                    Cover(galleryname, imageLeft, imageRight)
+                }
             } catch (e: Exception) {
                 Log.e(TAG, e.toString())
             }
@@ -154,45 +167,32 @@ class TagseeViewmodel @Inject constructor(
     }
 
     // toggles a tag of a photo on/off
+    // NOTE this will trigger a full circle refresh of the state
     fun toggleTag(url: String, tag: String) {
-        Log.d(TAG, "going to toggle ${tag} for ${url}")
         viewModelScope.launch {
             try {
                 val taggedPhotos = getGallery().first()
-                val username = getUsername().first()
+                val galleryname = getGalleryname().first()
                 val body: RequestBody = taggedPhotos.serializePendingToggle(url, tag)
                     .toRequestBody("text/plain".toMediaTypeOrNull())
-                //TagseeApi.retrofitService.updateMeta(username, body)
-                apiService.updateMeta(username, body)
-                reloadMeta(username)
+                apiService.postGalleryMeta(galleryname, body)
+                reloadGalleryMeta(galleryname)
             } catch (e: Exception) {
                 Log.e(TAG, e.toString())
             }
         }
     }
 
-    // looks up the gallery size for a user
-    // can be used to verify the existence of a user
-    fun getLobbyUserGallerySize(username: String) {
-        Log.i(TAG, "getting gallery size for ${username}")
-        lobbyUserGallerySize.value = 0
+    fun getLobbyGallerySize(galleryname: String) {
+        Log.i(TAG, "getting gallery size for ${galleryname}")
+        lobbyGallerySize.value = 0
         viewModelScope.launch {
             try {
-                //val gallery = TagseeApi.retrofitService.getGallery(username = username)
-                val gallery = apiService.getGallery(username = username)
-                lobbyUserGallerySize.value = gallery.size
+                val gallery = apiService.getGalleryImages(galleryname)
+                lobbyGallerySize.value = gallery.size
             } catch (e: Exception) {
                 Log.e(TAG, e.toString())
             }
         }
     }
-
-    // dev
-    // resets the metadata for the user 'markus' to a mocked stage
-    //fun setupUser() {
-        //updateMeta("markus", TaggedPhotos.dummies)
-        //Log.d(TAG, "setupuser(). currently unused.")
-    //}
-
-
 }

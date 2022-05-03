@@ -26,5 +26,6 @@ object MainModule {
 @InstallIn(ViewModelComponent::class)
 object ApiModule {
     @Provides
+    //fun provideApiService() = TagseeApi.retrofitService as TagseeApiService
     fun provideApiService() = TagseeApi.mockService as TagseeApiService
 }

@@ -34,6 +34,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun SelectableItem(
+    // TODO clean this up for tags
     modifier: Modifier = Modifier,
     selected: Boolean,
     title: String,

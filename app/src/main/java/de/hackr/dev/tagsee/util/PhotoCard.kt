@@ -23,12 +23,11 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import de.hackr.dev.tagsee.ui.theme.Shapes
-import de.hackr.dev.tagsee.viewmodel.TaggedPhoto
+import de.hackr.dev.tagsee.model.TaggedPhoto
 
-@ExperimentalMaterialApi
 @Composable
 fun PhotoCard(
-    // FIXME clean this up for the type taggedphoto
+    // TODO clean this up for the type tagged photo
     photo: TaggedPhoto,
     url: String = photo.url,
     alltags: String,
@@ -47,7 +46,7 @@ fun PhotoCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .border(4.dp, MaterialTheme.colors.primaryVariant)
+            .border(5.dp, MaterialTheme.colors.primaryVariant.copy(alpha = 0.2f))
             .animateContentSize(
                 animationSpec = tween(
                     durationMillis = 300,

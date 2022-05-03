@@ -14,12 +14,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 enum class FilterStrategy(val value: String) {
-
     ALL_IMAGES("all images"),
     ANY_TAG("any tag"),
     ALL_TAGS("all tags"),
     NO_TAG("untagged"),
-
 }
 
 @Composable
@@ -53,7 +51,7 @@ fun DropdownFilterStrategy(onSelect: (index: Int) -> Unit) {
             modifier = Modifier
                 .fillMaxWidth(0.8F)
                 .background(
-                    MaterialTheme.colors.background
+                    MaterialTheme.colors.background.copy(0.7F)
                 )
         ) {
             items.forEachIndexed { index, s ->

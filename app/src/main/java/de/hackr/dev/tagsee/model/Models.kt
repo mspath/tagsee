@@ -1,10 +1,16 @@
-package de.hackr.dev.tagsee.viewmodel
+package de.hackr.dev.tagsee.model
+
+import com.google.gson.Gson
+
+data class Cover(val name: String, val imageLeft: String, val imageRight: String)
 
 data class TaggedPhoto(val url: String, val tags: MutableList<String>) {
 
     // the export format for string based storage like preferences
     // url<tag,tag,..>
     fun serialize() = "${url}<${tags.toSet().map {it.trim()}.joinToString(",")}>"
+
+    fun toJson() = gson.toJson(this)
 
     companion object {
         fun fromSerializedString(line: String): TaggedPhoto {
@@ -14,6 +20,9 @@ data class TaggedPhoto(val url: String, val tags: MutableList<String>) {
                 .split(",")
             return TaggedPhoto(url, tags.toMutableList())
         }
+
+        val gson = Gson()
+        fun fromJson(json: String) = gson.fromJson(json, TaggedPhoto::class.java)
     }
 }
 
@@ -39,9 +48,12 @@ data class TaggedPhotos(val collection: List<TaggedPhoto>) {
             .trim()
     }
 
+    @Transient
     private val map = collection.associateBy { it.url }
 
     fun getTags() = collection.map { it.tags.toList() }.flatten().toSet()
+
+    fun toJson() = TaggedPhoto.gson.toJson(this)
 
     companion object {
         // we need to pass in both lists of urls and tagged urls since the list
@@ -55,7 +67,7 @@ data class TaggedPhotos(val collection: List<TaggedPhoto>) {
                 Pair(line.substringBefore("<"), TaggedPhoto.fromSerializedString(line))
             }
 
-            // we just use those which are currently available
+            // we only take those which are currently available
             // defaults to no tags if there are no metadata yet.
             val taggedPhotos = gallery.map { url ->
                 metaMap.getOrDefault(url, TaggedPhoto(url, mutableListOf<String>()))
@@ -64,15 +76,9 @@ data class TaggedPhotos(val collection: List<TaggedPhoto>) {
             return TaggedPhotos(taggedPhotos)
         }
 
-        // FIXME move this in a helper class
-        val dummy1 = TaggedPhoto("http://192.168.178.41:3000/markus/images/flat1.jpg",
-            mutableListOf("puppet"))
-        val dummy2 = TaggedPhoto("http://192.168.178.41:3000/markus/images/flat2.jpg",
-            mutableListOf("puppet", "yellow"))
-        val dummy3 = TaggedPhoto("http://192.168.178.41:3000/markus/images/flat3.jpg",
-            mutableListOf("eric"))
-        val dummy4 = TaggedPhoto("http://192.168.178.41:3000/markus/images/flat4.jpg",
-            mutableListOf("cute"))
-        val dummies = TaggedPhotos(listOf(dummy1, dummy2, dummy3, dummy4))
+        fun fromJson(json: String): TaggedPhotos {
+            val gson = TaggedPhoto.gson
+            return gson.fromJson(json, TaggedPhotos::class.java)
+        }
     }
 }

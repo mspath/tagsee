@@ -10,15 +10,20 @@ import androidx.compose.ui.graphics.Color
 private val DarkColorPalette = darkColors(
     primary = Purple200,
     primaryVariant = Purple700,
-    secondary = Teal200
+    secondary = yellow_dark,
+    background = Color.DarkGray,
+    surface = Color.White,
+    onPrimary = Color.White,
+    onSecondary = Color.Black,
+    onBackground = Color.Black,
+    onSurface = Color.Black,
 )
 
 private val LightColorPalette = lightColors(
     primary = Purple500,
     primaryVariant = Purple700,
-    secondary = Teal200,
-
-    background = Color.LightGray,
+    secondary = yellow_light,
+    background = yellow_primary,
     surface = Color.White,
     onPrimary = Color.White,
     onSecondary = Color.Black,
@@ -28,6 +33,9 @@ private val LightColorPalette = lightColors(
 
 @Composable
 fun TagseeTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
+
+    // TODO fix dark theme
+
     val colors = if (darkTheme) {
         DarkColorPalette
     } else {
