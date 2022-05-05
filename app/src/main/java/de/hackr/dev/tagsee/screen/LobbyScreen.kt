@@ -2,20 +2,27 @@ package de.hackr.dev.tagsee.screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import de.hackr.dev.tagsee.R
 import de.hackr.dev.tagsee.viewmodel.TagseeViewmodel
 import de.hackr.dev.tagsee.navigation.Screen
-import de.hackr.dev.tagsee.ui.theme.yellow_dark
 import de.hackr.dev.tagsee.ui.theme.yellow_light
-import de.hackr.dev.tagsee.util.Covers
+import de.hackr.dev.tagsee.components.Covers
 
 // TODO error handling on network errors
-//  i.e. display a note that galleries or api-service are not available
 @Composable
 fun LobbyScreen(
     navController: NavHostController,
@@ -81,9 +88,11 @@ fun LobbyScreen(
                 Badge(
                     backgroundColor = MaterialTheme.colors.primaryVariant,
                     contentColor = yellow_light,
-                    modifier = Modifier.padding(start = 8.dp)
-                        .size(20.dp)
-                ) { Text(lobbyGallerySize.value.toString()) }
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        //.size(24.dp)
+                ) { Text(lobbyGallerySize.value.toString(),
+                    style = MaterialTheme.typography.button) }
             }
 
             Box(

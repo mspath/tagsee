@@ -9,6 +9,7 @@ val Teal200 = Color(0xFF03DAC5)
 val Teal700 = Color(0xFF018786)
 
 val yellow_light = Color(0xffffff8b)
-val yellow_primary = Color(0xffffee58)
+//0xffffee58
+val yellow_primary = Color(0xffd5d846)
 val yellow_dark = Color(0xffFFD600)
 val yellow_darkest = Color(0x2DBEA210)

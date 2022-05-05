@@ -1,4 +1,4 @@
-package de.hackr.dev.tagsee.util
+package de.hackr.dev.tagsee.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

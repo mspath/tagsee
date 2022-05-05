@@ -1,4 +1,4 @@
-package de.hackr.dev.tagsee.util
+package de.hackr.dev.tagsee.components
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -8,15 +8,19 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
+import de.hackr.dev.tagsee.R
 import de.hackr.dev.tagsee.ui.theme.yellow_light
 import de.hackr.dev.tagsee.model.Cover
 
 @Composable
 fun Covers(covers: List<Cover>, onSelect: (String) -> Unit, selected: String?) {
 
-    // TODO error handling (e.g. placeholder if an imageLeft or imageRight is missing)
     LazyRow(
         Modifier
             .padding(0.dp, 24.dp, 0.dp, 0.dp)
@@ -31,10 +35,13 @@ fun Covers(covers: List<Cover>, onSelect: (String) -> Unit, selected: String?) {
                     .height(200.dp)
                     .background(MaterialTheme.colors.primary.copy(alpha))
                     .clickable { onSelect(cover.name) }) {
-                Image(
-                    painter = rememberImagePainter(
-                        data = cover.imageLeft
-                    ),
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(cover.imageRight)
+                        .crossfade(true)
+                        .build(),
+                    placeholder = painterResource(R.drawable.loading_img),
+                    error = painterResource(R.drawable.ic_connection_error),
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxSize()
@@ -42,10 +49,13 @@ fun Covers(covers: List<Cover>, onSelect: (String) -> Unit, selected: String?) {
                         .border(6.dp, color = yellow_light),
                     contentScale = ContentScale.FillBounds
                 )
-                Image(
-                    painter = rememberImagePainter(
-                        data = cover.imageRight
-                    ),
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(cover.imageLeft)
+                        .crossfade(true)
+                        .build(),
+                    placeholder = painterResource(R.drawable.loading_img),
+                    error = painterResource(R.drawable.ic_connection_error),
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxSize()

@@ -1,4 +1,4 @@
-package de.hackr.dev.tagsee.util
+package de.hackr.dev.tagsee.components
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -13,21 +14,26 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
+import de.hackr.dev.tagsee.R
 import de.hackr.dev.tagsee.ui.theme.Shapes
 import de.hackr.dev.tagsee.model.TaggedPhoto
 
 @Composable
 fun PhotoCard(
-    // TODO clean this up for the type tagged photo
     photo: TaggedPhoto,
     url: String = photo.url,
     alltags: String,
@@ -65,15 +71,18 @@ fun PhotoCard(
                     200.dp, 200.dp, 400.dp, 300.dp
                 )
             ) {
-                Image(
-                    painter = rememberImagePainter(
-                        data = photo.url
-                    ),
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(photo.url)
+                        .crossfade(true)
+                        .build(),
+                    placeholder = painterResource(R.drawable.loading_img),
+                    error = painterResource(R.drawable.ic_connection_error),
                     contentDescription = null,
+                    contentScale = ContentScale.FillBounds,
                     modifier = Modifier
                         .padding(4.dp)
                         .fillMaxSize(),
-                    contentScale = ContentScale.FillBounds
                 )
             }
             Row(
@@ -107,9 +116,9 @@ fun PhotoCard(
                 val scrollState = rememberScrollState()
                 Row(Modifier.horizontalScroll(scrollState)) {
                     tags.toSet().forEach { tag ->
-                        SelectableItem(
+                        SelectableTag(
                             selected = photo.tags.contains(tag),
-                            title = tag,
+                            text = tag,
                             modifier = Modifier.width(150.dp)) {
                             onTagToggle(url, tag)
                         }

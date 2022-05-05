@@ -10,9 +10,9 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import de.hackr.dev.tagsee.navigation.Screen
-import de.hackr.dev.tagsee.util.DropdownFilterStrategy
-import de.hackr.dev.tagsee.util.FilterStrategy
-import de.hackr.dev.tagsee.util.SelectableItem
+import de.hackr.dev.tagsee.components.DropdownFilterStrategy
+import de.hackr.dev.tagsee.components.FilterStrategy
+import de.hackr.dev.tagsee.components.SelectableTag
 import de.hackr.dev.tagsee.viewmodel.TagseeViewmodel
 
 import androidx.compose.material.Icon
@@ -20,11 +20,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.sp
+import de.hackr.dev.tagsee.components.Covers
 
 @Composable
 fun TagsScreen(
     navController: NavHostController,
     viewModel: TagseeViewmodel) {
+
+    // TODO clear new tags once they are added
 
     val currentTags = viewModel.getTags().collectAsState(initial = emptySet())
     val selectedFilterStrategy = viewModel.selectedFilterStrategy
@@ -86,8 +89,8 @@ fun TagsScreen(
             modifier = Modifier.padding(0.dp, 16.dp, 0.dp, 8.dp))
 
         currentTags.value.forEach {
-            SelectableItem(selected = viewModel.tagSelected(it),
-                title = it,
+            SelectableTag(selected = viewModel.tagSelected(it),
+                text = it,
                 onClick = { viewModel.toggleSelectedTag(it) },
             modifier = Modifier.background(MaterialTheme.colors.secondary))
         }

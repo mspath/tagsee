@@ -11,7 +11,7 @@ import de.hackr.dev.tagsee.data.DataStoreRepository
 import de.hackr.dev.tagsee.model.Cover
 import de.hackr.dev.tagsee.model.TaggedPhotos
 import de.hackr.dev.tagsee.network.TagseeApiService
-import de.hackr.dev.tagsee.util.FilterStrategy
+import de.hackr.dev.tagsee.components.FilterStrategy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch

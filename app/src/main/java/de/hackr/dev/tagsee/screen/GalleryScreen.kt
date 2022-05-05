@@ -13,8 +13,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import de.hackr.dev.tagsee.model.TaggedPhoto
 import de.hackr.dev.tagsee.model.TaggedPhotos
-import de.hackr.dev.tagsee.util.PhotoCard
-import de.hackr.dev.tagsee.util.FilterStrategy
+import de.hackr.dev.tagsee.components.PhotoCard
+import de.hackr.dev.tagsee.components.FilterStrategy
 import de.hackr.dev.tagsee.viewmodel.TagseeViewmodel
 
 @Composable

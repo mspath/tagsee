@@ -34,8 +34,6 @@ private val LightColorPalette = lightColors(
 @Composable
 fun TagseeTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
 
-    // TODO fix dark theme
-
     val colors = if (darkTheme) {
         DarkColorPalette
     } else {

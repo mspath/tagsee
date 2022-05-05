@@ -1,4 +1,4 @@
-package de.hackr.dev.tagsee.util
+package de.hackr.dev.tagsee.components
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
@@ -33,16 +33,15 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 @Composable
-fun SelectableItem(
-    // TODO clean this up for tags
+fun SelectableTag(
     modifier: Modifier = Modifier,
     selected: Boolean,
-    title: String,
-    titleColor: Color =
+    text: String,
+    color: Color =
         if (selected) MaterialTheme.colors.primary
         else MaterialTheme.colors.onSurface.copy(alpha = 0.2f),
-    titleSize: TextUnit = MaterialTheme.typography.h6.fontSize,
-    titleWeight: FontWeight = FontWeight.Medium,
+    textSize: TextUnit = MaterialTheme.typography.h6.fontSize,
+    textWeight: FontWeight = FontWeight.Medium,
     borderWidth: Dp = 1.dp,
     borderColor: Color =
         if (selected) MaterialTheme.colors.primary
@@ -56,7 +55,6 @@ fun SelectableItem(
 ) {
     val scaleA = remember { Animatable(initialValue = 1f) }
     val scaleB = remember { Animatable(initialValue = 1f) }
-
     val clickEnabled = remember { mutableStateOf(true) }
 
     // see https://gist.github.com/stevdza-san/73a573eabf6f30514a3431f010ad6bf1
@@ -119,11 +117,11 @@ fun SelectableItem(
         ) {
             Text(
                 modifier = Modifier.weight(8f),
-                text = title,
+                text = text,
                 style = TextStyle(
-                    color = titleColor,
-                    fontSize = titleSize,
-                    fontWeight = titleWeight
+                    color = color,
+                    fontSize = textSize,
+                    fontWeight = textWeight
                 ),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -140,7 +138,7 @@ fun SelectableItem(
             ) {
                 Icon(
                     imageVector = icon,
-                    contentDescription = "Selectable Item Icon",
+                    contentDescription = "Selectable Tag Icon",
                     tint = iconColor
                 )
             }
